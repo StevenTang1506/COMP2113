@@ -4,7 +4,11 @@ int main() {
     // Prompt the user to input the maximum number of innings
     int maxInnings;
     std::cout << "Enter the maximum number of innings: ";
-    std::cin >> maxInnings;
+    while (!(std::cin >> maxInnings) || maxInnings <= 0) {
+        std::cout << "Invalid input. Please enter a positive number: ";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
 
     // Prompt the user to choose whether they want to attack first
     bool attackFirst;
