@@ -5,7 +5,7 @@
 - Tang Yun Kuen 3035685457
 
 ## Demo Video
-[![Watch the video](https://img.youtube.com/vi/hCzKy_ZhkiM/0.jpg)](https://www.youtube.com/watch?v=hCzKy_ZhkiM)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hCzKy_ZhkiM?si=fX6eIS9RBx-K4jGz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## Game Description and Rules
 
