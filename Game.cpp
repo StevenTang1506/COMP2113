@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <algorithm>
 // Default constructor
 Game::Game() 
     : innings(0), maxInnings(9), strikes(0), outs(0), runs(0), scores(0), 
