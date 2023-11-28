@@ -8,9 +8,7 @@
 
 Mini-baseball Game is a text-based baseball game where players take turns to pitch and hit. The aim of the game is to score as many runs as possible before the game ends.
 
-The game operates on an inning-by-inning basis. Each inning consists of two halves, the top half (where the player bats) and the bottom half (where the player pitches). Players can choose different types of pitches and hits, and the outcomes are determined by a combination of these choices and random number generation.
-
-The scoring system is based on the real rules of baseball, where the aim is to score more runs than the opponent.
+The game operates on an inning-by-inning basis. As the pitcher, the player selects a pitch location from 1 to 9 representing different parts of the strike zone. The batter then selects a swing location from 1 to 9. If the swing location matches the pitch location, it's a hit! Otherwise, it's a strike or out!
 
 ## Features and Coding Elements 
 
@@ -34,7 +32,5 @@ The scoring system is based on the real rules of baseball, where the aim is to s
 2. Open your terminal and navigate to the directory containing the files.
 3. Compile the game using the command ```make```.
 4. Run the game using the command ```./game```.
-
-Please note that the teaching team will follow these instructions to compile and run the game.
 
 We hope you enjoy playing my game!
