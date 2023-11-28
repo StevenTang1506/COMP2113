@@ -3,7 +3,7 @@
 void mainMenu(Game& game) {
     int maxInnings;
     bool attackFirst;
-    bool notLoaded;
+    bool notLoaded = false;
     while (true) {
         std::cout << "1. Play Game\n";
         std::cout << "2. Settings\n";
