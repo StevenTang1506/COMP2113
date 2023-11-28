@@ -4,6 +4,9 @@
 
 - Tang Yun Kuen 3035685457
 
+## Demo Video
+[![Watch the video](https://img.youtube.com/vi/hCzKy_ZhkiM/0.jpg)](https://www.youtube.com/watch?v=hCzKy_ZhkiM)
+
 ## Game Description and Rules
 
 Mini-baseball Game is a text-based baseball game where players take turns to pitch and hit. The aim of the game is to score as many runs as possible before the game ends.
