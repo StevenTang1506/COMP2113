@@ -26,8 +26,6 @@ The scoring system is based on the real rules of baseball, where the aim is to s
 
 ## Non-Standard Libraries
 
-List any non-standard C/C++ libraries used in your project. Be sure to indicate what features in your game are supported by these libraries.
-
 1. **Library 1** - <random>: This library is used to generate random numbers that add an element of unpredictability to the outcomes of pitches and hits.
 
 ## Compilation and Execution Instructions
