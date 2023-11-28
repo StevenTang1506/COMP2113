@@ -1,10 +1,22 @@
 #include "Game.h"
+// Default constructor
+Game::Game() 
+    : innings(0), maxInnings(9), strikes(0), outs(0), runs(0), scores(0), 
+      opponentScores(0), isOver(false), attackFirst(true), gen(rd()), dis(1, 100) 
+{
+    bases.fill(false);
+}
 
 // Constructor: Initializes a new game.
 Game::Game(int maxInnings, bool attackFirst)
-    : innings(0), maxInnings(maxInnings), strikes(0), runs(0), isOver(false),
-      attackFirst(attackFirst), gen(rd()), dis(0, 99) {} // The initial game state is set, along with setting up the random number generator.
+    : innings(0), maxInnings(maxInnings), strikes(0), outs(0), runs(0), 
+      scores(0), opponentScores(0), isOver(false),
+      attackFirst(attackFirst), gen(rd()), dis(0, 99) 
+{
+    bases.fill(false);
+} // The initial game state is set, along with setting up the random number generator.
 
+void mainMenu(Game& game);
 // loadGame: Loads the game state from a file.
 void Game::loadGame() {
     std::ifstream file("game_status.txt"); // Open the file
@@ -12,10 +24,20 @@ void Game::loadGame() {
         file >> innings;
         file >> maxInnings;
         file >> strikes;
+        file >> outs;
         file >> runs;
+        file >> scores;
+        file >> opponentScores;
         file >> isOver;
         file >> attackFirst;
+        // Load the state of each base
+        for (int i = 0; i < 3; ++i) {
+            file >> bases[i];
+        }
         file.close(); // Close the file after reading.
+    }
+    else {
+        std::cout << "Unable to open the file. Please check if the file exists and try again.\n";
     }
 }
 
@@ -26,11 +48,39 @@ void Game::saveGame() {
         file << innings << "\n";
         file << maxInnings << "\n";
         file << strikes << "\n";
+        file << outs << "\n";
         file << runs << "\n";
+        file << scores << "\n";
+        file << opponentScores << "\n";
         file << isOver << "\n";
         file << attackFirst << "\n";
+        // Save the state of each base
+        for (int i = 0; i < 3; ++i) {
+            file << bases[i] << "\n";
+        }
         file.close(); // Close the file after writing.
     }
+    else {
+        std::cout << "Unable to open the file. Please check the file permissions and try again.\n";
+    }
+}
+
+void Game::showGameStatus() {
+    std::cout << "------- Game Status -------" << '\n';
+    std::cout << "Inning: " << innings << '\n';
+    std::cout << "Outs: " << outs << '\n';
+    std::cout << "Strikes: " << strikes << '\n';
+    
+    // Display the bases in a diamond pattern
+    std::cout << "Bases:\n";
+    std::cout << "   " << (bases[1] ? "2" : "◆") << "\n";
+    std::cout << " ⟋   ⟍\n";
+    std::cout << (bases[2] ? "3" : "◆") << "      " << (bases[0] ? "1" : "◆") << "\n";
+    std::cout << " ⟍   ⟋\n";
+    
+    std::cout << "Your score: " << scores << '\n';
+    std::cout << "Opponent's score: " << opponentScores << '\n';
+    std::cout << "----------------------------" << '\n';
 }
 
 // getRandomEvent: Returns a random number between 0 and 99 inclusive.
@@ -40,7 +90,7 @@ int Game::getRandomEvent() {
 
 // checkGameOver: Checks if the game is over based on the number of innings played.
 void Game::checkGameOver() {
-    if (innings >= maxInnings) {
+    if (innings > maxInnings) {
         isOver = true;
     }
 }
@@ -56,143 +106,131 @@ int Game::getValidInput() {
     return input;
 }
 
-// performAttack: Handles the attack phase of the game. The player and computer choose numbers and the result is determined based on the difference.
-void Game::performAttack() {
-    // player chooses a number
-    std::cout << "Choose a number for batting (1-9): ";
-    int playerChoice = getValidInput();
-
-    // computer chooses a number
-    int computerChoice = getRandomEvent() % 9 + 1;
-
-    // check the result
-    int diff = abs(playerChoice - computerChoice);
-    if (diff == 0) {
-        // homerun
-        runs += 4;
-        std::cout << "Homerun! You earned 4 runs.\n";
-    } else if (diff == 1) {
-        // 70% 2 bases, 20% 1 base, 10% out
-        int event = getRandomEvent();
-        if (event < 70) {
-            runs += 2;
-            std::cout << "2 bases hit! You earned 2 runs.\n";
-        } else if (event < 90) {
-            runs += 1;
-            std::cout << "1 base hit! You earned 1 run.\n";
-        } else {
-            strikes += 1;
-            std::cout << "Out!\n";
+// handleHit: Handle different no. of base hit.
+void Game::handleHit(int basesToAdvance) {
+    if (basesToAdvance == 4) { // Home run scenario
+        runs += std::count(bases.begin(), bases.end(), true) + 1;
+        std::fill(bases.begin(), bases.end(), false);
+    } else { // All other scenarios
+        for (int i = 2; i >= 0; --i) {
+            if (bases[i]) {
+                int newPosition = i + basesToAdvance;
+                runs += (newPosition > 2);
+                bases[i] = false;
+                if (newPosition <= 2) bases[newPosition] = true;
+            }
         }
-    } else if (diff == 2) {
-        // 70% 1 base, 20% out, 10% strike
-        int event = getRandomEvent();
-        if (event < 70) {
-            runs += 1;
-            std::cout << "1 base hit! You earned 1 run.\n";
-        } else if (event < 90) {
-            strikes += 1;
-            std::cout << "Out!\n";
+        // Place the batter on base
+        bases[basesToAdvance - 1] = true;
+    }
+}
+
+// handleOutcome: Handles the outcome of the player's and computer's choices
+void Game::handleOutcome(int diff, const std::array<int, 3>& eventOutcomes,  bool isAttack) {
+    std::cout << "Result:" << "\n";
+    std::string phase = isAttack ? "You're" : "opponent is";
+    int event = getRandomEvent();
+    if (diff == 0) {
+        handleHit(4);
+        strikes = 0;
+        std::cout << "Homerun! " << phase << " earned 4 runs.\n";
+    } else if (diff <= 2) {
+        if (event < eventOutcomes[0]) {
+            handleHit(2);
+            std::cout << "2 bases hit! " << phase << " in scoring position.\n";
+        } else if (event < eventOutcomes[1]) {
+            handleHit(1);
+            std::cout << "1 base hit! " << phase << " on base.\n";
         } else {
             strikes += 1;
             std::cout << "Strike!\n";
         }
     } else {
-        // 80% out, 20% strike
-        int event = getRandomEvent();
-        if (event < 80) {
-            strikes += 1;
-            std::cout << "Out!\n";
-        } else {
-            strikes += 1;
-            std::cout << "Strike!\n";
-        }
-    }
-
-    // check if the inning is over
-    if (strikes >= 3) {
-        strikes = 0;
-        innings += 1;
-        checkGameOver();
-    }
-}
-
-// performDefence: Handles the defense phase of the game. The player and computer choose numbers and the result is determined based on the difference.
-void Game::performDefence() {
-    // player chooses a number
-    std::cout << "Choose a number for pitching (1-9): ";
-    int playerChoice = getValidInput();
-
-    // computer chooses a number
-    int computerChoice = getRandomEvent() % 9 + 1;
-
-    // check the result
-    int diff = abs(playerChoice - computerChoice);
-    if (diff == 0) {
-        // strike
         strikes += 1;
         std::cout << "Strike!\n";
-    } else if (diff == 1) {
-        // 70% out, 20% 1 base, 10% 2 bases
-        int event = getRandomEvent();
-        if (event < 70) {
-            strikes += 1;
-            std::cout << "Out!\n";
-        } else if (event < 90) {
-            runs -= 1;
-            std::cout << "1 base hit by opponent. You lost 1 run.\n";
-        } else {
-            runs -= 2;
-            std::cout << "2 bases hit by opponent. You lost 2 runs.\n";
-        }
-    } else if (diff == 2) {
-        // 70% 1 base, 20% 2 bases, 10% homerun
-        int event = getRandomEvent();
-        if (event < 70) {
-            runs -= 1;
-            std::cout << "1 base hit by opponent. You lost 1 run.\n";
-        } else if (event < 90) {
-            runs -= 2;
-            std::cout << "2 bases hit by opponent. You lost 2 runs.\n";
-        } else {
-            runs -= 4;
-            std::cout << "Homerun by opponent! You lost 4 runs.\n";
-        }
-    } else {
-        // 80% 2 bases, 20% homerun
-        int event = getRandomEvent();
-        if (event < 80) {
-            runs -= 2;
-            std::cout << "2 bases hit by opponent. You lost 2 runs.\n";
-        } else {
-            runs -= 4;
-            std::cout << "Homerun by opponent! You lost 4 runs.\n";
-        }
     }
-
-    // check if the inning is over
     if (strikes >= 3) {
+        outs += 1;
         strikes = 0;
-        innings += 1;
-        checkGameOver();
+        std::cout << "Three strikes! " << phase << " out!\n";
     }
 }
 
-// play: Main game loop. Alternates between attack and defense phases until the game is over.
+// performAttack: Handles the attack phase of the game.
+void Game::performAttack() {
+    bases.fill(false);
+    while (!isOver) {
+        showGameStatus();
+        std::cout << "Choose a number for batting (1-9): ";
+        int playerChoice = getValidInput();
+        int computerChoice = getRandomEvent() % 9 + 1;
+        int diff = abs(playerChoice - computerChoice);
+        std::array<int, 3> eventOutcomes = {50, 80};
+        handleOutcome(diff, eventOutcomes);
+        scores += runs;
+        runs = 0;
+        if (outs >= 3) {
+            outs = 0;
+            break;
+        }
+    }
+}
+
+// performDefence: Handles the defense phase of the game.
+void Game::performDefence() {
+    bases.fill(false);
+    while (!isOver) {
+        showGameStatus();
+        std::cout << "Choose a number for pitching (1-9): ";
+        int playerChoice = getValidInput();
+        int computerChoice = getRandomEvent() % 9 + 1;
+        int diff = abs(playerChoice - computerChoice);
+        std::array<int, 3> eventOutcomes = {50, 80};
+        handleOutcome(diff, eventOutcomes, false);
+        opponentScores += runs;
+        runs = 0;
+        if (outs >= 3) {
+            outs = 0;
+            break;
+        }
+    }
+}
+
+// play: Main game loop.
 void Game::play() {
     std::cout << "Welcome to the game!\n";
+    
     while (!isOver) {
+        std::string action;
+        std::cout << "Enter 'menu' to access the main menu or 'continue' to proceed with the game.\n";
+        std::cin >> action;
+
+        // Check if user wants to access main menu
+        if (action == "menu") {
+            mainMenu(*this);
+            if (getUserQuit()) {
+                isOver = true;
+            }
+            continue;
+        }
+
         if (attackFirst) {
+            innings += 1;
+            checkGameOver();
             performAttack();
             if (!isOver) {
+                std::cout << "-------    Defence!    -------" << "\n";
                 performDefence();
             }
         } else {
+            innings += 1;
+            checkGameOver();
             performDefence();
             if (!isOver) {
+                std::cout << "-------    Attack!    -------" << "\n";
                 performAttack();
             }
         }
     }
-    std::cout << "Game over. Final score: " << runs << "\n";
+    std::cout << "Game over. Your final score: " << scores << ", Opponent's final score: " << opponentScores << "\n";
 }
