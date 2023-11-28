@@ -34,7 +34,7 @@ List any non-standard C/C++ libraries used in your project. Be sure to indicate 
 
 1. Download the source code files and make sure they are in the same directory.
 2. Open your terminal and navigate to the directory containing the files.
-3. Compile the game using the command ```g++ -std=c++11 -o game main.cpp Game.cpp```.
+3. Compile the game using the command ```make```.
 4. Run the game using the command ```./game```.
 
 Please note that the teaching team will follow these instructions to compile and run the game.
