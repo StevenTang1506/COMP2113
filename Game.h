@@ -5,6 +5,7 @@
 #include <fstream>
 #include <random>
 #include <iostream>
+#include <array>
 
 // The Game class includes functionality to save and load game states, handle game events, and control the main game loop.
 class Game {
