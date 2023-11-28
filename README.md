@@ -26,7 +26,7 @@ The scoring system is based on the real rules of baseball, where the aim is to s
 
 ## Non-Standard Libraries
 
-1. **Library 1** - <random>: This library is used to generate random numbers that add an element of unpredictability to the outcomes of pitches and hits.
+1. **Library 1** - random: This library is used to generate random numbers that add an element of unpredictability to the outcomes of pitches and hits.
 
 ## Compilation and Execution Instructions
 
