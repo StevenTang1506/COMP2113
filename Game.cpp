@@ -18,7 +18,7 @@ Game::Game(int maxInnings, bool attackFirst)
 
 void mainMenu(Game& game);
 // loadGame: Loads the game state from a file.
-void Game::loadGame() {
+bool Game::loadGame() {
     std::ifstream file("game_status.txt"); // Open the file
     if (file.is_open()) { // If the file is open, read the game state from it.
         file >> innings;
@@ -35,9 +35,11 @@ void Game::loadGame() {
             file >> bases[i];
         }
         file.close(); // Close the file after reading.
+        return true;
     }
     else {
         std::cout << "Unable to open the file. Please check if the file exists and try again.\n";
+        return false;
     }
 }
 
@@ -65,8 +67,30 @@ void Game::saveGame() {
     }
 }
 
+// printStrikeZOne for illustrating the postion of batting and pitching
+void Game::printStrikeZone() {
+    int strikeZone[3][3] = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            std::cout << strikeZone[i][j];
+            if (j < 2) {
+                std::cout << " | ";
+            }
+        }
+        std::cout << "\n";
+        if (i < 2) {
+            std::cout << "--|---|--\n";
+        }
+    }
+}
+
 void Game::showGameStatus() {
-    std::cout << "------- Game Status -------" << '\n';
+    std::cout << "\033[1;33m------- Game Status -------\033[0m" << '\n';
     std::cout << "Inning: " << innings << '\n';
     std::cout << "Outs: " << outs << '\n';
     std::cout << "Strikes: " << strikes << '\n';
@@ -80,7 +104,7 @@ void Game::showGameStatus() {
     
     std::cout << "Your score: " << scores << '\n';
     std::cout << "Opponent's score: " << opponentScores << '\n';
-    std::cout << "----------------------------" << '\n';
+    std::cout << "\033[1;33m----------------------------\033[0m" << '\n';
 }
 
 // getRandomEvent: Returns a random number between 0 and 99 inclusive.
@@ -127,23 +151,38 @@ void Game::handleHit(int basesToAdvance) {
 
 // handleOutcome: Handles the outcome of the player's and computer's choices
 void Game::handleOutcome(int diff, const std::array<int, 3>& eventOutcomes,  bool isAttack) {
-    std::cout << "Result:" << "\n";
+    std::cout << "\033[1;32mResult:\033[0m" << "\n";
     std::string phase = isAttack ? "You're" : "opponent is";
     int event = getRandomEvent();
     if (diff == 0) {
         handleHit(4);
         strikes = 0;
         std::cout << "Homerun! " << phase << " earned 4 runs.\n";
-    } else if (diff <= 2) {
+    } else if (diff == 1) {
         if (event < eventOutcomes[0]) {
             handleHit(2);
+            strikes = 0;
             std::cout << "2 bases hit! " << phase << " in scoring position.\n";
         } else if (event < eventOutcomes[1]) {
             handleHit(1);
+            strikes = 0;
             std::cout << "1 base hit! " << phase << " on base.\n";
         } else {
             strikes += 1;
             std::cout << "Strike!\n";
+        }
+    } else if (diff == 2) {
+        if (event < eventOutcomes[0]) {
+            handleHit(1);
+            strikes = 0;
+            std::cout << "1 bases hit! " << phase << " on base.\n";
+        } else if (event < eventOutcomes[1]) {
+            strikes += 1;
+            std::cout << "Strike!\n";
+        } else {
+            outs += 1;
+            strikes = 0;
+            std::cout << "The ball is caught by the outfielder! Batter out!\n";
         }
     } else {
         strikes += 1;
@@ -165,7 +204,7 @@ void Game::performAttack() {
         int playerChoice = getValidInput();
         int computerChoice = getRandomEvent() % 9 + 1;
         int diff = abs(playerChoice - computerChoice);
-        std::array<int, 3> eventOutcomes = {50, 80};
+        std::array<int, 3> eventOutcomes = {30, 70};
         handleOutcome(diff, eventOutcomes);
         scores += runs;
         runs = 0;
@@ -185,7 +224,7 @@ void Game::performDefence() {
         int playerChoice = getValidInput();
         int computerChoice = getRandomEvent() % 9 + 1;
         int diff = abs(playerChoice - computerChoice);
-        std::array<int, 3> eventOutcomes = {50, 80};
+        std::array<int, 3> eventOutcomes = {30, 70};
         handleOutcome(diff, eventOutcomes, false);
         opponentScores += runs;
         runs = 0;
@@ -207,30 +246,33 @@ void Game::play() {
 
         // Check if user wants to access main menu
         if (action == "menu") {
-            mainMenu(*this);
+            mainMenu(*this, true);
             if (getUserQuit()) {
                 isOver = true;
             }
             continue;
         }
-
-        if (attackFirst) {
-            innings += 1;
-            checkGameOver();
-            performAttack();
-            if (!isOver) {
-                std::cout << "-------    Defence!    -------" << "\n";
-                performDefence();
-            }
-        } else {
-            innings += 1;
-            checkGameOver();
-            performDefence();
-            if (!isOver) {
-                std::cout << "-------    Attack!    -------" << "\n";
+        std::cout << "Strike Zone" << "\n";
+        printStrikeZone();
+        if (!isOver) {
+            if (attackFirst) {
+                innings += 1;
+                checkGameOver();
                 performAttack();
+                if (!isOver) {
+                    std::cout << "\033[1;31m-------    Defence!    -------\033[0m" << "\n";
+                    performDefence();
+                }
+            } else {
+                innings += 1;
+                checkGameOver();
+                performDefence();
+                if (!isOver) {
+                    std::cout << "\033[1;31m-------    Attack!    -------\033[0m" << "\n";
+                    performAttack();
+                }
             }
         }
+        std::cout << "Game over. Your final score: " << scores << ", Opponent's final score: " << opponentScores << "\n";
     }
-    std::cout << "Game over. Your final score: " << scores << ", Opponent's final score: " << opponentScores << "\n";
 }
