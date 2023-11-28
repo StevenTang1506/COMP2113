@@ -8,20 +8,27 @@
 
 // The Game class includes functionality to save and load game states, handle game events, and control the main game loop.
 class Game {
+    bool userLoad;
     bool userQuit;
 public:
     Game(); // Default constructor
     Game(int maxInnings, bool attackFirst);
-    void loadGame();
+    bool loadGame();
     void saveGame();
     void play();
     void setMaxInnings(int maxInnings) { this->maxInnings = maxInnings; } // Setter for maxInnings
     void setAttackFirst(bool attackFirst) { this->attackFirst = attackFirst; } // Setter for attackFirst
-    void setUserQuit(bool quit) {
+    void setUserQuit(bool quit) { // Setter for quit
         userQuit = quit;
     }
-    bool getUserQuit() const {
+    bool getUserQuit() const { // Getter for quit
         return userQuit;
+    }
+    void setLoaded(bool loaded) { // Setter for loaded
+        userLoad = loaded;
+    }
+    bool getLoaded() const { // Getter for loaded
+        return userLoad;
     }
 
 private:
@@ -52,8 +59,9 @@ private:
     void performDefence();
     void showGameStatus();
     void handleHit(int basesToAdvance);
+    void printStrikeZone();
 };
 
-void mainMenu(Game& game);
+void mainMenu(Game& game, bool);
 
 #endif // GAME_H
