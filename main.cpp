@@ -1,9 +1,8 @@
 #include "Game.h"
 
-void mainMenu(Game& game) {
+void mainMenu(Game& game, bool loaded = false) {
     int maxInnings;
     bool attackFirst;
-    bool notLoaded = false;
     while (true) {
         std::cout << "1. Play Game\n";
         std::cout << "2. Settings\n";
@@ -16,9 +15,10 @@ void mainMenu(Game& game) {
         switch (option) {
             case 1: // Play the game
                 // Prompt the user to input the maximum number of innings
-                if (notLoaded) {
+                if (!loaded) {
                 
                     std::cout << "Enter the maximum number of innings: ";
+                    // Handle invalid input
                     while (!(std::cin >> maxInnings) || maxInnings <= 0) {
                         std::cout << "Invalid input. Please enter a positive number: ";
                         std::cin.clear();
@@ -64,8 +64,12 @@ void mainMenu(Game& game) {
                             std::cout << "Game saved successfully.\n";
                             break;
                         case 2: // Load the game
-                            game.loadGame();
-                            notLoaded = false;
+                            if (game.loadGame()) {
+                                game.setLoaded(true);
+                            } else {
+                                game.setLoaded(false);
+                                break;
+                            }
                             std::cout << "Game loaded successfully.\n";
                             break;
                         case 3: // Back to main menu
@@ -89,12 +93,12 @@ int main() {
     Game game;
 
     // Call the main menu
-    mainMenu(game);
+    mainMenu(game, false);
 
     if (game.getUserQuit()) {
         std::cout << "Thank you for playing. See you next time!\n";
     } else {
-        mainMenu(game);
+        mainMenu(game, game.getLoaded());
     }
 
     return 0;
