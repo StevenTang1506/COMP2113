@@ -5,7 +5,12 @@
 - Tang Yun Kuen 3035685457
 
 ## Demo Video
-<iframe width="560" height="315" src="https://www.youtube.com/embed/hCzKy_ZhkiM?si=fX6eIS9RBx-K4jGz" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+
+https://github.com/StevenTang1506/COMP2113-Group10/assets/61890694/3d4fbd46-a08a-4b9a-85f9-14026103da48
+### Youtube Version
+https://www.youtube.com/watch?v=hCzKy_ZhkiM
+
 
 ## Game Description and Rules
 
@@ -36,4 +41,4 @@ The game operates on an inning-by-inning basis. As the pitcher, the player selec
 3. Compile the game using the command ```make```.
 4. Run the game using the command ```./game```.
 
-We hope you enjoy playing my game!
+I hope you enjoy playing my game!
